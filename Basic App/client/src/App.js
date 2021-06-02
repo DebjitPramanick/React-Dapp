@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import SimpleStorageContract from "./contracts/SimpleStorage.json";
 import getWeb3 from "./getWeb3";
+import BlockChainContext from "./BlockChainContext"
+import ChildComponent from "./ChildComponent"
 
 import "./App.css";
 
@@ -11,14 +13,14 @@ const App = () => {
   const [contract, setContract] = useState({})
 
   useEffect(() => {
-    const init = async() => {
+    const init = async () => {
       try {
         // Get network provider and web3 instance.
         const web3 = await getWeb3();
-  
+
         // Use web3 to get the user's accounts.
         const accounts = await web3.eth.getAccounts();
-  
+
         // Get the contract instance.
         const networkId = await web3.eth.net.getId();
         console.log(networkId)
@@ -47,7 +49,7 @@ const App = () => {
 
 
   useEffect(() => {
-    const load = async() => {
+    const load = async () => {
       // Stores a given value, 5 by default.
       await contract.methods.setData(5807).send({ from: accounts[0] });
 
@@ -60,31 +62,36 @@ const App = () => {
       setStorageVal(response)
     }
 
-    if(web3 !== undefined
-    && accounts !== undefined
-    && Object.keys(contract).length){
+    if (web3 !== undefined
+      && accounts !== undefined
+      && Object.keys(contract).length) {
       load()
     }
   }, [web3, accounts, contract])
 
 
-  if(typeof web3 === 'undefined'){
+  if (typeof web3 === 'undefined') {
     return <div>Loading Web3, accounts, and contract...</div>;
   }
-  else{
+  else {
     return (
       <div className="App">
-        <h1>Good to Go!</h1>
-        <p>Your Truffle Box is installed and ready.</p>
-        <h2>Smart Contract Example</h2>
-        <p>
-          If your contracts compiled and migrated successfully, below will show
-          a stored value of 5 (by default).
-        </p>
-        <p>
-          Try changing the value stored on <strong>line 40</strong> of App.js.
-        </p>
-        <div>The stored value is: {storageVal}</div>
+        <BlockChainContext.Provider value={{web3, accounts, contract}}>
+          <h1>Good to Go!</h1>
+          <p>Your Truffle Box is installed and ready.</p>
+          <h2>Smart Contract Example</h2>
+          <p>
+            If your contracts compiled and migrated successfully, below will show
+            a stored value of 5 (by default).
+          </p>
+
+          <ChildComponent/>
+
+          <p>
+            Try changing the value stored on <strong>line 40</strong> of App.js.
+          </p>
+          <div>The stored value is: {storageVal}</div>
+        </BlockChainContext.Provider>
       </div>
     );
   }
